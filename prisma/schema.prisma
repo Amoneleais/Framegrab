@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Movie {
-  id          String      @id @default(cuid())
+  id          String      @id
   title       String
   description String?
   releaseDate DateTime
@@ -21,7 +21,7 @@ model Movie {
 }
 
 model Still {
-  id        String   @id @default(cuid())
+  id        String   @id 
   url       String
   timestamp Int
   createdAt DateTime @default(now())
