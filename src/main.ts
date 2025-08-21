@@ -6,9 +6,9 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = new DocumentBuilder()
-    .setTitle('Framegrab')
-    .setDescription('')
-    .setVersion('1.0.1')
+    .setTitle('framegrab')
+    .setDescription('framegrab is a tool for extracting frames from videos.')
+    .setVersion('1.0.0')
     .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
