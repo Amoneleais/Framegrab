@@ -1,12 +1,12 @@
 import cuid from 'cuid';
-import { Replace } from 'src/utils/replace';
+import { Replace } from '../../../utils/replace';
 
 interface MovieSchema {
-  id: string;
   title: string;
   description: string | null;
   releaseDate: Date;
   rating: number | null;
+  path: string;
   createdAt: Date;
   updatedAt: Date;
   stills: [];
@@ -74,6 +74,14 @@ export class Movie {
 
   set rating(rating: number | null) {
     this.props.rating = rating;
+  }
+
+  get path(): string {
+    return this.props.path;
+  }
+
+  set path(path: string) {
+    this.props.path = path;
   }
 
   get createdAt(): Date {
