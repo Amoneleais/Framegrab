@@ -41,6 +41,9 @@ prisma/dev.db
 # TypeScript
 *.js.map
 
+# Outputs
+output/
+
 # Misc
 coverage/
 nyc_output/
