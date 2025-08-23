@@ -10,18 +10,14 @@ services:
     ports:
       - '5432:5432'
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'pg_isready -U postgres -d framegrab || exit 1',
-        ]
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d framegrab || exit 1']
       interval: 5s
       timeout: 5s
       retries: 5
 
   app:
     build: .
-    image: filmgrab
+    image: framegrab
     environment:
       DATABASE_URL: 'postgresql://postgres:postgres@db:5432/framegrab'
       NODE_ENV: development
@@ -29,7 +25,7 @@ services:
       - '3000:3000'
     volumes:
       - /c/:/host-c
-      - ./stills:/usr/src/app/stills_output
+      - ./output:/usr/src/app/output
     depends_on:
       - db
     restart: on-failure

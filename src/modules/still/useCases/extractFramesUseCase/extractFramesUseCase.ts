@@ -25,7 +25,7 @@ export class ExtractFramesUseCase {
       throw new Error('Movie not found');
     }
 
-    const stillsPath = '/usr/src/app/stills_output';
+    const stillsPath = '/usr/src/app/output';
 
     const outputDir = path.join(stillsPath, movie.title);
     await fs.mkdir(outputDir, { recursive: true });
