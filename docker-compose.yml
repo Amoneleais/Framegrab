@@ -13,7 +13,7 @@ services:
       test:
         [
           'CMD-SHELL',
-          'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} || exit 1',
+          'pg_isready -U postgres -d framegrab || exit 1',
         ]
       interval: 5s
       timeout: 5s
@@ -27,6 +27,9 @@ services:
       NODE_ENV: development
     ports:
       - '3000:3000'
+    volumes:
+      - /c/:/host-c
+      - ./stills:/usr/src/app/stills_output
     depends_on:
       - db
     restart: on-failure

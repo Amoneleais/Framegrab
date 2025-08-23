@@ -4,8 +4,8 @@ FROM node:24-alpine
 # Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Install bash required by the entrypoint script
-RUN apk add --no-cache bash
+# Install bash and ffmpeg required by the application
+RUN apk add --no-cache bash ffmpeg
 
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
