@@ -21,8 +21,16 @@ export class PrismaMovieRepository implements MovieRepository {
   delete(id: string): Promise<void> {
     throw new Error('Method not implemented.');
   }
-  findById(id: string): Promise<Movie | null> {
-    throw new Error('Method not implemented.');
+  async findById(id: string): Promise<Movie | null> {
+    const movie = await this.prisma.movie.findUnique({
+      where: { id },
+    });
+
+    if (!movie) {
+      return null;
+    }
+
+    return PrismaMovieMapper.toDomain(movie);
   }
   update(movie: Movie): Promise<void> {
     throw new Error('Method not implemented.');
