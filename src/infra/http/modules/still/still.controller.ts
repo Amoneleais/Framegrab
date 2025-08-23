@@ -1,28 +1,28 @@
 import { Controller, Post, Param, Query, ParseIntPipe } from '@nestjs/common';
-import { ExtractFramesUseCase } from '../../../../modules/still/useCases/extractFramesUseCase/extractFramesUseCase';
+import { ExtractStillsUseCase } from '../../../../modules/still/useCases/extractStillsUseCase/extractStillsUseCase';
 import { ApiTags, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('stills')
 @Controller('stills')
 export class StillController {
-  constructor(private extractFramesUseCase: ExtractFramesUseCase) {}
+  constructor(private extractStillsUseCase: ExtractStillsUseCase) {}
 
   @Post('extract/:movieId')
-  @ApiOperation({ summary: 'Extract frames from a movie' })
+  @ApiOperation({ summary: 'Extract stills from a movie' })
   @ApiParam({
     name: 'movieId',
-    description: 'The ID of the movie to extract frames from',
+    description: 'The ID of the movie to extract stills from',
   })
   @ApiQuery({
     name: 'interval',
     required: false,
-    description: 'Interval in seconds between frames (default: 1)',
+    description: 'Interval in seconds between stills (default: 1)',
     type: Number,
   })
-  async extractFrames(
+  async extractStills(
     @Param('movieId') movieId: string,
     @Query('interval', new ParseIntPipe({ optional: true })) interval?: number,
   ) {
-    return this.extractFramesUseCase.execute(movieId, interval);
+    return this.extractStillsUseCase.execute(movieId, interval);
   }
 }

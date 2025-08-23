@@ -12,7 +12,7 @@ import { windowsToLinuxPath } from '../../../../utils/path';
 const execAsync = promisify(exec);
 
 @Injectable()
-export class ExtractFramesUseCase {
+export class ExtractStillsUseCase {
   constructor(
     private stillRepository: StillRepository,
     private movieRepository: MovieRepository,
@@ -65,7 +65,7 @@ export class ExtractFramesUseCase {
       return stills;
     } catch (error) {
       throw new Error(
-        `Failed to extract frames: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to extract stills: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
