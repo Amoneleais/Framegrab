@@ -30,6 +30,9 @@ ENV NODE_PATH=./dist
 
 # Copy and set entrypoint that waits for DB and runs migrations before starting
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Fix CRLF endings just in case the script came from Windows
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh && \
+    chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
