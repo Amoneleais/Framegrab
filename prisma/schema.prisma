@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Movie {
+  id          String      @id
+  title       String
+  description String?
+  releaseDate DateTime
+  rating      Float?
+  path        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  stills Still[]
+
+  @@index([title])
+}
+
+model Still {
+  id        String   @id 
+  url       String
+  timestamp Int
+  createdAt DateTime @default(now())
+
+  movie   Movie  @relation(fields: [movieId], references: [id])
+  movieId String
+
+  @@index([movieId])
+}

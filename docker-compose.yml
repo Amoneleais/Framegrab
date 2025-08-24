@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:15
+    container_name: framegrab-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: framegrab
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres', '-d', 'framegrab']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    image: framegrab
+    container_name: framegrab-app
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/framegrab
+      NODE_ENV: development
+    ports:
+      - '3000:3000'
+    volumes:
+      - ${MOVIES_PATH:-./movies}:/usr/src/app/movies
+      - ./output:/usr/src/app/output
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+
+volumes:
+  db-data:
+    driver: local
