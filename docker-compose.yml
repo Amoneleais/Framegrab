@@ -1,6 +1,9 @@
+version: '3.9'
+
 services:
   db:
     image: postgres:15
+    container_name: framegrab-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -18,17 +21,20 @@ services:
   app:
     build: .
     image: framegrab
+    container_name: framegrab-app
     environment:
-      DATABASE_URL: 'postgresql://postgres:postgres@db:5432/framegrab'
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/framegrab
       NODE_ENV: development
     ports:
       - '3000:3000'
     volumes:
-      - /path/to/movies:/usr/src/app/movies # Adjust this path as needed
+      - ${MOVIES_PATH:-./movies}:/usr/src/app/movies
       - ./output:/usr/src/app/output
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: on-failure
 
 volumes:
-  db-data: {}
+  db-data:
+    driver: local
