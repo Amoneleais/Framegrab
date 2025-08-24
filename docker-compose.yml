@@ -24,7 +24,7 @@ services:
     ports:
       - '3000:3000'
     volumes:
-      - /c/:/host-c
+      - C:/media/Movies:/usr/src/app/movies # Adjust this path as needed
       - ./output:/usr/src/app/output
     depends_on:
       - db

@@ -7,7 +7,6 @@ import { StillRepository } from '../../repositories/StillRepository';
 import { MovieRepository } from '../../../movie/repositories/MovieRepository';
 import { Still } from '../../entities/Still';
 import { makeStill } from '../../factories/stillFactory';
-import { windowsToLinuxPath } from '../../../../utils/path';
 
 const execAsync = promisify(exec);
 
@@ -30,12 +29,9 @@ export class ExtractStillsUseCase {
     const outputDir = path.join(stillsPath, movie.title);
     await fs.mkdir(outputDir, { recursive: true });
 
-    const moviePath = windowsToLinuxPath(movie.path);
+    const moviePath = path.join('/usr/src/app/movies', movie.path);
 
-    const command = `ffmpeg -i "file://${moviePath}" -vf fps=1/${interval} "${path.join(
-      outputDir,
-      'frame-%d.jpg',
-    )}"`;
+    const command = `ffmpeg -i "${moviePath}" -vf fps=1/${interval} "${path.join(outputDir, 'frame-%d.jpg')}"`;
 
     try {
       await execAsync(command);
