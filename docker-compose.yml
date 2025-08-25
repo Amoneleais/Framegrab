@@ -2,17 +2,18 @@ services:
   # PostgreSQL Database Service
   db:
     image: postgres:15
-    container_name: framegrab-db
+    container_name: framegrabapi-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: framegrab
+      POSTGRES_DB: framegrabapi
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
     healthcheck:
-      test: ['CMD', 'pg_isready', '-U', '${POSTGRES_USER}', '-d', 'framegrab']
+      test:
+        ['CMD', 'pg_isready', '-U', '${POSTGRES_USER}', '-d', 'framegrabapi']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,8 +21,8 @@ services:
   # Application Service
   app:
     build: .
-    image: framegrab
-    container_name: framegrab-app
+    image: framegrabapi
+    container_name: framegrabapi-app
     environment:
       DATABASE_URL: ${DATABASE_URL}
       NODE_ENV: ${NODE_ENV}
