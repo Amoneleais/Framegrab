@@ -1,13 +1,26 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Query,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { CreateMovieUseCase } from 'src/modules/movie/useCases/createMovieUseCase/createMovieUseCase';
+import { GetAllMoviesUseCase } from 'src/modules/movie/useCases/getAllMoviesUseCase/getAllMoviesUseCase';
 import { CreateMovieBody } from './dto/createMovieBody';
 import { MovieViewModel } from './viewModel/movieViewModel';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('movies')
 export class MovieController {
-  constructor(private readonly createMovieUseCase: CreateMovieUseCase) {}
+  constructor(
+    private readonly createMovieUseCase: CreateMovieUseCase,
+    private readonly getAllMoviesUseCase: GetAllMoviesUseCase,
+  ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a new movie' })
   async create(@Body() body: CreateMovieBody) {
     const { title, description, releaseDate, rating, path } = body;
 
@@ -20,5 +33,16 @@ export class MovieController {
     });
 
     return MovieViewModel.toHTTP(movie);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all movies with pagination' })
+  async getAllMovies(
+    @Query('page', ParseIntPipe) page: number,
+    @Query('limit', ParseIntPipe) limit: number,
+  ) {
+    const movies = await this.getAllMoviesUseCase.execute({ page, limit });
+
+    return movies.map((movie) => MovieViewModel.toHTTP(movie));
   }
 }
