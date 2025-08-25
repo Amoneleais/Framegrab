@@ -3,7 +3,7 @@ import { MovieRepository } from '../../repositories/MovieRepository';
 import { Movie } from '@prisma/client';
 
 @Injectable()
-export class findByIdUseCase {
+export class FindByIdUseCase {
   constructor(private readonly movieRepository: MovieRepository) {}
 
   async execute(id: string): Promise<Movie | null> {

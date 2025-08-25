@@ -1,14 +1,14 @@
 import { makeMovie } from '../../factories/movieFactory';
 import { MovieRepositoryInMemory } from '../../repositories/MovieRepositoryInMemory';
-import { findByIdUseCase } from './findByIdUseCase';
+import { FindByIdUseCase } from './findByIdUseCase';
 
 let movieRepositoryInMemory: MovieRepositoryInMemory;
-let findMovieByIdUseCase: findByIdUseCase;
+let findMovieByIdUseCase: FindByIdUseCase;
 
 describe('Find Movie by ID', () => {
   beforeEach(() => {
     movieRepositoryInMemory = new MovieRepositoryInMemory();
-    findMovieByIdUseCase = new findByIdUseCase(movieRepositoryInMemory);
+    findMovieByIdUseCase = new FindByIdUseCase(movieRepositoryInMemory);
   });
 
   it('should be able to find a movie by ID', async () => {
