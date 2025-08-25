@@ -7,6 +7,11 @@ import { MovieRepository } from '../../../movie/repositories/MovieRepository';
 import { Still } from '../../entities/Still';
 import { makeStill } from '../../factories/stillFactory';
 
+interface ExtractStillsRequest {
+  movieId: string;
+  interval?: number;
+}
+
 @Injectable()
 export class ExtractStillsUseCase {
   constructor(
@@ -28,7 +33,10 @@ export class ExtractStillsUseCase {
     });
   }
 
-  async execute(movieId: string, interval: number = 1): Promise<Still[]> {
+  async execute({
+    movieId,
+    interval = 1,
+  }: ExtractStillsRequest): Promise<Still[]> {
     const movie = await this.movieRepository.findById(movieId);
 
     if (!movie) {
