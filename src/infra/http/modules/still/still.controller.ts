@@ -5,7 +5,7 @@ import { ApiTags, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 @ApiTags('stills')
 @Controller('stills')
 export class StillController {
-  constructor(private extractStillsUseCase: ExtractStillsUseCase) {}
+  constructor(private readonly extractStillsUseCase: ExtractStillsUseCase) {}
 
   @Post('extract/:movieId')
   @ApiOperation({ summary: 'Extract stills from a movie' })

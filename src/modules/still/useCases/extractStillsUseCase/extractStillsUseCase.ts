@@ -64,7 +64,7 @@ export class ExtractStillsUseCase {
       });
 
       ffmpeg.on('error', (err) => {
-        reject(err);
+        reject(new Error(`Failed to start ffmpeg: ${err.message}`));
       });
     });
 
@@ -126,7 +126,7 @@ export class ExtractStillsUseCase {
       });
 
       ffprobe.on('error', (err) => {
-        reject(err);
+        reject(new Error(`Failed to start ffprobe: ${err.message}`));
       });
     });
   }
