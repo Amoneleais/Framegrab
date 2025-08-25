@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Movie } from 'src/modules/movie/entities/Movie';
 import { MovieRepository } from 'src/modules/movie/repositories/MovieRepository';
 import { Injectable } from '@nestjs/common';
@@ -15,24 +14,34 @@ export class PrismaMovieRepository implements MovieRepository {
       data: prismaMovie,
     });
   }
-  getAll(page: number, limit: number): Promise<Movie[]> {
-    throw new Error('Method not implemented.');
+  async getAll(page: number, limit: number): Promise<Movie[]> {
+    const prismaMovies = await this.prisma.movie.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return prismaMovies.map((movie) => PrismaMovieMapper.toDomain(movie));
   }
-  delete(id: string): Promise<void> {
-    throw new Error('Method not implemented.');
+  async delete(id: string): Promise<void> {
+    await this.prisma.movie.delete({
+      where: { id },
+    });
   }
   async findById(id: string): Promise<Movie | null> {
-    const movie = await this.prisma.movie.findUnique({
+    const prismaMovie = await this.prisma.movie.findUnique({
       where: { id },
     });
 
-    if (!movie) {
+    if (!prismaMovie) {
       return null;
     }
 
-    return PrismaMovieMapper.toDomain(movie);
+    return PrismaMovieMapper.toDomain(prismaMovie);
   }
-  update(movie: Movie): Promise<void> {
-    throw new Error('Method not implemented.');
+  async update(movie: Movie): Promise<void> {
+    const prismaMovie = PrismaMovieMapper.toPrisma(movie);
+    await this.prisma.movie.update({
+      where: { id: movie.id },
+      data: prismaMovie,
+    });
   }
 }
