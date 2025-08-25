@@ -1,32 +1,34 @@
 services:
+  # PostgreSQL Database Service
   db:
     image: postgres:15
     container_name: framegrab-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: framegrab
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
     healthcheck:
-      test: ['CMD', 'pg_isready', '-U', 'postgres', '-d', 'framegrab']
+      test: ['CMD', 'pg_isready', '-U', '${POSTGRES_USER}', '-d', 'framegrab']
       interval: 5s
       timeout: 5s
       retries: 5
 
+  # Application Service
   app:
     build: .
     image: framegrab
     container_name: framegrab-app
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/framegrab
-      NODE_ENV: development
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: ${NODE_ENV}
     ports:
-      - '3000:3000'
+      - '${APP_PORT}:3000'
     volumes:
-      - ${MOVIES_PATH:-./movies}:/usr/src/app/movies
+      - C:/media/Movies:/usr/src/app/movies # Update this path to your movies directory
       - ./output:/usr/src/app/output
     depends_on:
       db:
