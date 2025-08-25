@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { spawn, SpawnOptions } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { StillRepository } from '../../repositories/StillRepository';
@@ -8,14 +7,26 @@ import { MovieRepository } from '../../../movie/repositories/MovieRepository';
 import { Still } from '../../entities/Still';
 import { makeStill } from '../../factories/stillFactory';
 
-const execAsync = promisify(exec);
-
 @Injectable()
 export class ExtractStillsUseCase {
   constructor(
-    private stillRepository: StillRepository,
-    private movieRepository: MovieRepository,
+    private readonly stillRepository: StillRepository,
+    private readonly movieRepository: MovieRepository,
   ) {}
+
+  private safeSpawn(
+    command: string,
+    args: string[],
+    options: SpawnOptions = {},
+  ) {
+    return spawn(command, args, {
+      ...options,
+      env: {
+        PATH: '/usr/bin:/bin:/usr/local/bin',
+        ...(options.env ?? {}),
+      },
+    });
+  }
 
   async execute(movieId: string, interval: number = 1): Promise<Still[]> {
     const movie = await this.movieRepository.findById(movieId);
@@ -25,24 +36,47 @@ export class ExtractStillsUseCase {
     }
 
     const stillsPath = '/usr/src/app/output';
-
     const outputDir = path.join(stillsPath, movie.title);
     await fs.mkdir(outputDir, { recursive: true });
 
     const moviePath = path.join('/usr/src/app/movies', movie.path);
 
-    const command = `ffmpeg -i "${moviePath}" -vf fps=1/${interval} "${path.join(outputDir, 'frame-%d.jpg')}"`;
+    const args = [
+      '-hide_banner',
+      '-loglevel',
+      'info',
+      '-i',
+      moviePath,
+      '-vf',
+      `fps=1/${interval}`,
+      path.join(outputDir, 'frame-%d.jpg'),
+    ];
 
-    try {
-      await execAsync(command);
+    await new Promise<void>((resolve, reject) => {
+      const ffmpeg = this.safeSpawn('ffmpeg', args);
 
-      const files = await fs.readdir(outputDir);
-      const jpgFiles = files.filter((file) => file.endsWith('.jpg'));
+      ffmpeg.on('close', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`ffmpeg exited with code ${code}`));
+        }
+      });
 
-      const stills: Still[] = [];
+      ffmpeg.on('error', (err) => {
+        reject(err);
+      });
+    });
 
-      for (const file of jpgFiles) {
-        const frameNumber = parseInt(file.match(/frame-(\d+)\.jpg/)![1]);
+    const files = await fs.readdir(outputDir);
+    const jpgFiles = files.filter((file) => file.endsWith('.jpg'));
+
+    const stills: Still[] = [];
+
+    for (const file of jpgFiles) {
+      const frameNumberMatch = RegExp(/frame-(\d+)\.jpg/).exec(file);
+      if (frameNumberMatch) {
+        const frameNumber = parseInt(frameNumberMatch[1]);
         const timestamp = frameNumber * interval;
         const url = path.join(movie.title, file);
 
@@ -55,14 +89,45 @@ export class ExtractStillsUseCase {
 
         stills.push(still);
       }
-
-      await this.stillRepository.createMany(stills);
-
-      return stills;
-    } catch (error) {
-      throw new Error(
-        `Failed to extract stills: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
     }
+
+    await this.stillRepository.createMany(stills);
+
+    return stills;
+  }
+
+  private async getMovieDuration(filePath: string): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      const ffprobe = this.safeSpawn('ffprobe', [
+        '-v',
+        'error',
+        '-show_entries',
+        'format=duration',
+        '-of',
+        'default=noprint_wrappers=1:nokey=1',
+        filePath,
+      ]);
+
+      let output = '';
+      ffprobe.stdout!.on('data', (data: Buffer) => {
+        output += data.toString();
+      });
+
+      ffprobe.on('close', (code) => {
+        if (code === 0 && output) {
+          resolve(parseFloat(output));
+        } else {
+          reject(
+            new Error(
+              `ffprobe exited with code ${code} or produced no output.`,
+            ),
+          );
+        }
+      });
+
+      ffprobe.on('error', (err) => {
+        reject(err);
+      });
+    });
   }
 }
