@@ -4,7 +4,7 @@ import { ExtractStillsUseCase } from 'src/modules/still/useCases/extractStillsUs
 import { ExtractStillsBody } from './dto/extractStillsBody';
 import { StillViewModel } from './viewModel/stillViewModel';
 
-@ApiTags('stills')
+@ApiTags('Stills')
 @Controller('stills')
 export class StillController {
   constructor(private readonly extractStillsUseCase: ExtractStillsUseCase) {}

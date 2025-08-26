@@ -10,8 +10,9 @@ import { CreateMovieUseCase } from 'src/modules/movie/useCases/createMovieUseCas
 import { GetAllMoviesUseCase } from 'src/modules/movie/useCases/getAllMoviesUseCase/getAllMoviesUseCase';
 import { CreateMovieBody } from './dto/createMovieBody';
 import { MovieViewModel } from './viewModel/movieViewModel';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Movies')
 @Controller('movies')
 export class MovieController {
   constructor(

@@ -1,8 +1,8 @@
 {
   "name": "framegrabapi",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "version": "1.0.0",
+  "description": "A tool to extract still images from movies.",
+  "author": "Manoel Elias de Araujo Neto <manoelaraujo24@gmail.com>",
   "private": true,
   "license": "MIT",
   "scripts": {
