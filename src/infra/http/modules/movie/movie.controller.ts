@@ -10,7 +10,7 @@ import { CreateMovieUseCase } from 'src/modules/movie/useCases/createMovieUseCas
 import { GetAllMoviesUseCase } from 'src/modules/movie/useCases/getAllMoviesUseCase/getAllMoviesUseCase';
 import { CreateMovieBody } from './dto/createMovieBody';
 import { MovieViewModel } from './viewModel/movieViewModel';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Movies')
 @Controller('movies')
@@ -21,6 +21,9 @@ export class MovieController {
   ) {}
 
   @Post()
+  @ApiResponse({ status: 201, description: 'Movie created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request payload' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   @ApiOperation({ summary: 'Create a new movie' })
   async create(@Body() body: CreateMovieBody) {
     const { title, description, releaseDate, rating, path } = body;
@@ -38,6 +41,8 @@ export class MovieController {
 
   @Get()
   @ApiOperation({ summary: 'Get all movies with pagination' })
+  @ApiResponse({ status: 200, description: 'Movies retrieved successfully' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   async getAllMovies(
     @Query('page', ParseIntPipe) page: number,
     @Query('limit', ParseIntPipe) limit: number,
