@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MovieRepository } from '../../repositories/MovieRepository';
-import { Movie } from '@prisma/client';
+import { Movie } from 'src/modules/movie/entities/Movie';
 
 @Injectable()
 export class FindMovieByIdUseCase {

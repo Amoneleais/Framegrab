@@ -1,5 +1,6 @@
 import cuid from 'cuid';
 import { Replace } from '../../../utils/replace';
+import { Still } from 'src/modules/still/entities/Still';
 
 interface MovieSchema {
   title: string;
@@ -9,7 +10,7 @@ interface MovieSchema {
   path: string;
   createdAt: Date;
   updatedAt: Date;
-  stills: [];
+  stills: Still[];
 }
 
 export class Movie {
@@ -24,7 +25,7 @@ export class Movie {
         updatedAt?: Date;
         description?: string | null;
         rating?: number | null;
-        stills?: [];
+        stills?: Still[] | null;
       }
     >,
     id?: string,
@@ -96,11 +97,11 @@ export class Movie {
     this.props.updatedAt = updatedAt;
   }
 
-  get stills(): [] {
+  get stills(): Still[] | null {
     return this.props.stills;
   }
 
-  set stills(stills: []) {
+  set stills(stills: Still[]) {
     this.props.stills = stills;
   }
 }

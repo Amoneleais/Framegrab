@@ -5,9 +5,11 @@ import {
   Get,
   Query,
   ParseIntPipe,
+  Param,
 } from '@nestjs/common';
 import { CreateMovieUseCase } from 'src/modules/movie/useCases/createMovieUseCase/createMovieUseCase';
 import { GetAllMoviesUseCase } from 'src/modules/movie/useCases/getAllMoviesUseCase/getAllMoviesUseCase';
+import { FindMovieByIdUseCase } from 'src/modules/movie/useCases/findMovieByIdUseCase/findMovieByIdUseCase';
 import { CreateMovieBody } from './dto/createMovieBody';
 import { MovieViewModel } from './viewModel/movieViewModel';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -17,6 +19,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 export class MovieController {
   constructor(
     private readonly createMovieUseCase: CreateMovieUseCase,
+    private readonly findMovieByIdUseCase: FindMovieByIdUseCase,
     private readonly getAllMoviesUseCase: GetAllMoviesUseCase,
   ) {}
 
@@ -37,6 +40,18 @@ export class MovieController {
     });
 
     return MovieViewModel.toHTTP(movie);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a movie by ID' })
+  @ApiResponse({ status: 200, description: 'Movie retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Movie not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async findById(@Param('id') id: string) {
+    const movie = await this.findMovieByIdUseCase.execute(id);
+    if (movie) {
+      return MovieViewModel.toHTTP(movie);
+    }
   }
 
   @Get()
