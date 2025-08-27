@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { FFmpegService } from '../../../../infra/ffmpeg/ffmpeg.service';
+import { PathConfigService } from 'src/infra/config/path.config.service';
 import { StillRepository } from '../../repositories/StillRepository';
 import { MovieRepository } from '../../../movie/repositories/MovieRepository';
 import { Still } from '../../entities/Still';
@@ -18,6 +19,7 @@ export class ExtractStillsUseCase {
     private readonly stillRepository: StillRepository,
     private readonly movieRepository: MovieRepository,
     private readonly ffmpegService: FFmpegService,
+    private readonly pathConfig: PathConfigService,
   ) {}
 
   async execute({
@@ -30,16 +32,13 @@ export class ExtractStillsUseCase {
       throw new Error('Movie not found');
     }
 
-    const stillsPath =
-      process.platform === 'win32'
-        ? path.join(process.cwd(), 'output')
-        : '/usr/src/app/output';
+    const stillsPath = this.pathConfig.outputPath;
     const outputDir = path.join(stillsPath, movie.title);
     await fs.mkdir(outputDir, { recursive: true });
 
     const candidateMoviePaths = [
       path.join('/usr/src/app/movies', movie.path),
-      path.join(process.cwd(), 'movies', movie.path),
+      path.join(this.pathConfig.moviesPath, movie.path),
       movie.path,
     ];
 

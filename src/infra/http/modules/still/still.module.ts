@@ -7,6 +7,7 @@ import { PrismaStillRepository } from 'src/infra/database/prisma/repositories/Pr
 import { MovieRepository } from 'src/modules/movie/repositories/MovieRepository';
 import { PrismaMovieRepository } from 'src/infra/database/prisma/repositories/PrismaMovieRepository';
 import { FFmpegService } from 'src/infra/ffmpeg/ffmpeg.service';
+import { PathConfigService } from 'src/infra/config/path.config.service';
 
 @Module({
   imports: [DatabaseModule],
@@ -14,6 +15,7 @@ import { FFmpegService } from 'src/infra/ffmpeg/ffmpeg.service';
   providers: [
     ExtractStillsUseCase,
     FFmpegService,
+    PathConfigService,
     {
       provide: StillRepository,
       useClass: PrismaStillRepository,
