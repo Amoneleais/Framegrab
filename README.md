@@ -1,228 +1,161 @@
 # FramegrabAPI
 
-A powerful NestJS-based REST API for extracting still images from movies using FFmpeg. This application provides a clean architecture with domain-driven design principles for managing movies and extracting frame captures at specified intervals.
+A NestJS-based REST API to manage movies and extract still frames from video files using FFmpeg.
 
-## 🎬 Features
+This README is a concise guide to get the project running locally, using Docker, and running the main features.
 
-- **Movie Management**: Create, read, update, and delete movie records
-- **Still Frame Extraction**: Extract still images from movies at customizable intervals using FFmpeg
-- **Database Integration**: PostgreSQL with Prisma ORM for data persistence
-- **API Documentation**: Auto-generated Swagger/OpenAPI documentation
-- **Docker Support**: Complete containerization with Docker Compose
-- **Test Coverage**: Comprehensive unit and e2e testing
-- **Clean Architecture**: Domain-driven design with clear separation of concerns
+## Quick status
 
-## 🏗️ Architecture
+- Language: TypeScript / Node.js (NestJS)
+- Database: PostgreSQL + Prisma
+- Video processing: FFmpeg (invoked from the app)
 
-The project follows Clean Architecture principles with the following structure:
+## What you’ll find here
 
-```
-src/
-├── modules/           # Domain layer (entities, use cases, repositories)
-│   ├── movie/
-│   └── still/
-├── infra/            # Infrastructure layer
-│   ├── database/     # Prisma ORM configuration and repositories
-│   └── http/         # HTTP controllers, DTOs, and view models
-└── utils/            # Shared utilities
-```
+- Setup and development steps
+- Running with Docker
+- FFmpeg notes and extraction examples
+- Testing and troubleshooting
 
-## 🚀 Getting Started
+## Requirements
 
-### Prerequisites
+- Node.js 18+
+- npm or pnpm
+- Docker & Docker Compose (optional but recommended)
+- FFmpeg installed and available on PATH (or in the container)
 
-- Node.js (v18 or higher)
-- Docker and Docker Compose
-- FFmpeg (for video processing)
+## Setup (local, without Docker)
 
-### Installation
-
-1. Clone the repository:
+1. Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/Amoneleais/Framegrab.git
 cd FramegrabAPI
-```
-
-2. Install dependencies:
-
-```bash
 npm install
 ```
 
-3. Set up environment variables:
+2. Create environment file from the example:
 
 ```bash
 cp .env.example .env
 ```
 
-Update the `.env` file with your configuration:
+3. Edit `.env` with your values. Minimum required variables:
 
-```env
-DATABASE_URL="postgresql://username:password@localhost:5432/framegrabapi"
-POSTGRES_USER=your_username
-POSTGRES_PASSWORD=your_password
-```
+- DATABASE_URL - e.g. postgresql://user:pass@localhost:5432/framegrabapi
+- POSTGRES_USER
+- POSTGRES_PASSWORD
 
-4. Start the services with Docker Compose:
+4. Run Prisma migrations:
 
 ```bash
-docker-compose up -d
+npx prisma migrate dev --name init
 ```
 
-5. Run database migrations:
-
-```bash
-npx prisma migrate dev
-```
-
-6. Start the development server:
+5. Start development server:
 
 ```bash
 npm run start:dev
 ```
 
-The API will be available at `http://localhost:3000` and the Swagger documentation at `http://localhost:3000/api`.
+The API default base URL: http://localhost:3000
+Swagger docs (if enabled): http://localhost:3000/api
 
-## 📋 API Endpoints
+## Run with Docker (recommended for a quick local environment)
 
-### Movies
+This project includes a `docker-compose.yml` that brings up Postgres and the app.
 
-- **POST** `/movies` - Create a new movie
-- **GET** `/movies` - Get all movies with pagination
+1. Build and start services:
 
-### Stills
+```bash
+docker-compose up --build -d
+```
 
-- **POST** `/stills/extract` - Extract still frames from a movie
+2. Apply migrations from inside the app container (or locally):
 
-#### Extract Stills Example
+```bash
+npx prisma migrate deploy
+```
+
+3. Check logs / service status:
+
+```bash
+docker-compose logs -f
+```
+
+To stop:
+
+```bash
+docker-compose down
+```
+
+## FFmpeg and extracting stills
+
+FFmpeg must be available to the process that runs the app. On Windows, add FFmpeg to your PATH; on Linux/macOS use your package manager or the container image.
+
+Endpoint: POST /stills/extract
+
+Payload (JSON):
+
+```json
+{
+  "movieId": "<movie-id>",
+  "interval": 5
+}
+```
+
+Example using curl:
 
 ```bash
 curl -X POST http://localhost:3000/stills/extract \
   -H "Content-Type: application/json" \
-  -d '{
-    "movieId": "movie-id-here",
-    "interval": 5
-  }'
+  -d '{"movieId":"<movie-id>","interval":5}'
 ```
 
-## 🗄️ Database Schema
+Notes:
 
-The application uses PostgreSQL with the following main entities:
+- `interval` is seconds between extracted frames.
+- The app saves images to the configured output folder and records metadata in the DB.
 
-### Movie
+## Database models (summary)
 
-- `id` (String, Primary Key)
-- `title` (String)
-- `description` (String, Optional)
-- `releaseDate` (DateTime)
-- `rating` (Float, Optional)
-- `path` (String) - File path to the movie
-- `createdAt` (DateTime)
-- `updatedAt` (DateTime)
+- Movie: id, title, description?, releaseDate, rating?, path, createdAt, updatedAt
+- Still: id, url, timestamp (seconds), movieId, createdAt
 
-### Still
+See `prisma/schema.prisma` for the full model definitions.
 
-- `id` (String, Primary Key)
-- `url` (String) - Path to the extracted image
-- `timestamp` (Integer) - Time in seconds from movie start
-- `movieId` (String, Foreign Key)
-- `createdAt` (DateTime)
+## Testing
 
-## 🧪 Testing
-
-Run the test suite:
+Run unit tests:
 
 ```bash
-# Unit tests
 npm run test
+```
 
-# Watch mode
-npm run test:watch
+Run e2e tests:
 
-# Coverage report
-npm run test:cov
-
-# E2E tests
+```bash
 npm run test:e2e
 ```
 
-## 🐳 Docker
-
-The project includes Docker configuration for easy deployment:
+Generate coverage:
 
 ```bash
-# Build and start all services
-docker-compose up --build
-
-# Run in background
-docker-compose up -d
-
-# Stop services
-docker-compose down
+npm run test:cov
 ```
 
-## 📚 Development
+## Troubleshooting
 
-### Available Scripts
+- FFmpeg errors: verify ffmpeg is in PATH and accessible by the Node process. Run `ffmpeg -version` to confirm.
+- Prisma/DB: if migrations fail, ensure the `DATABASE_URL` is correct and the DB accepts connections.
+- Docker: if the app container doesn't start, inspect logs with `docker-compose logs` and ensure the DB container is healthy.
 
-- `npm run start` - Start the production server
-- `npm run start:dev` - Start development server with hot reload
-- `npm run start:debug` - Start server in debug mode
-- `npm run build` - Build the application
-- `npm run lint` - Run ESLint
-- `npm run format` - Format code with Prettier
+## License
 
-### Project Structure
+MIT — see the `LICENSE` file.
 
-```
-├── src/
-│   ├── modules/                    # Domain modules
-│   │   ├── movie/
-│   │   │   ├── entities/          # Domain entities
-│   │   │   ├── factories/         # Entity factories
-│   │   │   ├── repositories/      # Repository interfaces and implementations
-│   │   │   └── useCases/          # Business logic use cases
-│   │   └── still/
-│   ├── infra/
-│   │   ├── database/              # Database infrastructure
-│   │   │   └── prisma/           # Prisma service and mappers
-│   │   └── http/                 # HTTP infrastructure
-│   │       └── modules/          # HTTP controllers and DTOs
-│   └── utils/                    # Shared utilities
-├── prisma/                       # Database schema and migrations
-├── test/                         # E2E tests
-└── docker-compose.yml            # Docker services configuration
-```
+## Author
 
-## 🔧 Configuration
+Manoel Elias de Araujo Neto — manoelaraujo24@gmail.com
 
-### Environment Variables
-
-- `DATABASE_URL` - PostgreSQL connection string
-- `POSTGRES_USER` - Database username
-- `POSTGRES_PASSWORD` - Database password
-
-### FFmpeg Integration
-
-The application uses FFmpeg for video processing. Ensure FFmpeg is installed and accessible in the system PATH. The extraction process:
-
-1. Takes a movie file path and interval (in seconds)
-2. Uses FFmpeg to extract frames at specified intervals
-3. Saves extracted frames to the output directory
-4. Stores frame metadata in the database
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👤 Author
-
-**Manoel Elias de Araujo Neto**
-
-- Email: manoelaraujo24@gmail.com
-- GitHub: [@Amoneleais](https://github.com/Amoneleais)
-
----
-
-Made with ❤️ using NestJS, Prisma, and FFmpeg
+GitHub: https://github.com/Amoneleais
